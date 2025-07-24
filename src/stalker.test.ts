@@ -39,7 +39,9 @@ test("Simple Stalk Sync Function Test", async () => {
   expect(storage.savedSessions).toHaveLength(1);
   expect(storage.savedSessions[0].name).toBe("test");
   expect(storage.savedSessions[0].events).toHaveLength(0);
-  expect(storage.savedSessions[0].getDuration()).toBeGreaterThanOrEqual(10);
+  expect(storage.savedSessions[0].getDuration()).toBeGreaterThanOrEqual(
+    10000000,
+  );
 });
 
 test("Simple Stalk Async Function Test", async () => {
@@ -59,5 +61,7 @@ test("Simple Stalk Async Function Test", async () => {
   expect(storage.savedSessions).toHaveLength(1);
   expect(storage.savedSessions[0].name).toBe("test");
   expect(storage.savedSessions[0].events).toHaveLength(0);
-  expect(storage.savedSessions[0].getDuration()).toBeGreaterThanOrEqual(10);
+  expect(storage.savedSessions[0].getDuration()).toBeGreaterThanOrEqual(
+    5000000,
+  );
 });

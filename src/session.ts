@@ -14,19 +14,26 @@ export interface StalkerSession {
   getDuration(): number;
 }
 
+function now(): number {
+  if (typeof window !== "undefined") {
+    return window.performance.now();
+  }
+  return Date.now() * 1000 * 1000;
+}
+
 export function createSession(
   name: string,
   onEnd: (session: StalkerSession) => void,
 ): StalkerSession {
   const session: StalkerSession = {
     name,
-    startTime: window.performance.now(),
+    startTime: now(),
     events: [],
     addEvent: (name: string) => {
-      session.events.push({ name, time: window.performance.now() });
+      session.events.push({ name, time: now() });
     },
     endSession: () => {
-      session.endTime = window.performance.now();
+      session.endTime = now();
       onEnd(session);
     },
     getDuration: () => {
