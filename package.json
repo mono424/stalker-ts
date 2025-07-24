@@ -1,0 +1,39 @@
+{
+  "name": "@mono424/stalker-ts",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mono424/stalker-ts.git"
+  },
+  "scripts": {
+    "test": "jest",
+    "format": "prettier --write --parser typescript 'src/*.ts'",
+    "lint": "eslint . --fix",
+    "build": "tsc",
+    "deploy": "pnpm run build && pnpm publish"
+  },
+  "author": "Khadim Fall <info@khadimfall.com> (https://khad.im/)",
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/compat": "^1.1.0",
+    "@types/jest": "^29.5.12",
+    "@typescript-eslint/eslint-plugin": "^7.13.0",
+    "@typescript-eslint/parser": "^7.13.0",
+    "eslint": "^9.5.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-react": "^7.34.2",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-storybook": "^0.8.0",
+    "globals": "^15.6.0",
+    "prettier": "^3.3.2",
+    "ts-jest": "^29.1.5",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "@influxdata/influxdb3-client": "^1.2.0"
+  }
+}
