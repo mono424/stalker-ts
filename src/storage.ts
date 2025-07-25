@@ -1,5 +1,5 @@
-import { InfluxDBClient } from "@influxdata/influxdb3-client";
 import { StalkerSession } from "./session";
+import { InfluxDB, Point } from "@influxdata/influxdb-client";
 
 export interface Storage {
   saveSessions(sessions: StalkerSession[]): Promise<void>;
@@ -16,25 +16,33 @@ export function mockStorage(): Storage & { savedSessions: StalkerSession[] } {
   };
 }
 
-export function influxdbStorage(client: InfluxDBClient): Storage {
+export function influxdb2Storage(
+  client: InfluxDB,
+  org: string,
+  bucket: string,
+): Storage {
+  const writeApi = client.getWriteApi(org, bucket, "us"); // us = microseconds
   return {
     saveSessions: async (sessions: StalkerSession[]) => {
-      const points = sessions
-        .map(
-          (session) =>
-            `stalker_session,name=${session.name} duration=${session.getDuration()} ${session.startTime * 1000}\n${session.events
-              .map(
-                (event, index) =>
-                  `stalker_session_event,session_name=${session.name},event_name=${event.name} duration=${
-                    (index === session.events.length - 1
-                      ? session.endTime
-                      : session.events[index + 1].time) - event.time
-                  } ${event.time * 1000}`,
-              )
-              .join("\n")}`,
-        )
-        .join("\n");
-      await client.write(points);
+      const points = sessions.reduce((acc, session) => {
+        const sessionPoint = new Point("stalker_session")
+          .tag("type", "session")
+          .tag("name", session.name)
+          .floatField("duration", session.getDuration())
+          .timestamp(session.startTime);
+        const eventPoints = session.events.map((event) => {
+          const eventPoint = new Point("stalker_session_event")
+            .tag("type", "event")
+            .tag("name", event.name)
+            .tag("parent_session_name", session.name)
+            .floatField("duration", event.time - session.startTime)
+            .timestamp(event.time);
+          return eventPoint;
+        });
+        return acc.concat(sessionPoint, ...eventPoints);
+      }, [] as Point[]);
+
+      await writeApi.writePoints(points);
     },
   };
 }

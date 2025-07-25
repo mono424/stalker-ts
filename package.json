@@ -34,6 +34,6 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@influxdata/influxdb3-client": "^1.2.0"
+    "@influxdata/influxdb-client": "^1.35.0"
   }
 }
