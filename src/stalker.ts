@@ -12,6 +12,17 @@ export interface Stalker {
   flush(): Promise<void>;
   dispose(): void;
 
+  stalkWithOptions<F extends Function>(
+    name: string,
+    options: StalkerSessionOptions | null,
+    fn: F,
+  ): F;
+  stalkAsyncWithOptions<F extends (...args: any[]) => Promise<any>>(
+    name: string,
+    options: StalkerSessionOptions | null,
+    fn: F,
+  ): F;
+
   stalk<F extends Function>(name: string, fn: F): F;
   stalkAsync<F extends (...args: any[]) => Promise<any>>(
     name: string,
@@ -41,24 +52,37 @@ export function stalker(storage: Storage, autoFlushInterval: number = 3000) {
     return session;
   };
 
-  const stalk = <F extends (...args: any[]) => any>(name: string, fn: F): F =>
+  const stalkWithOptions = <F extends (...args: any[]) => any>(
+    name: string,
+    options: StalkerSessionOptions | null,
+    fn: F,
+  ): F =>
     ((...args: any[]) => {
-      const session = startSession(name);
+      const session = startSession(name, options || undefined);
       const result = fn(...args);
       session.endSession();
       return result;
     }) as F;
 
-  const stalkAsync = <F extends (...args: any[]) => Promise<any>>(
+  const stalkAsyncWithOptions = <F extends (...args: any[]) => Promise<any>>(
     name: string,
+    options: StalkerSessionOptions | null,
     fn: F,
   ): F =>
     (async (...args: any[]) => {
-      const session = startSession(name);
+      const session = startSession(name, options || undefined);
       const result = await fn(...args);
       session.endSession();
       return result;
     }) as F;
+
+  const stalk = <F extends (...args: any[]) => any>(name: string, fn: F): F =>
+    stalkWithOptions(name, null, fn);
+
+  const stalkAsync = <F extends (...args: any[]) => Promise<any>>(
+    name: string,
+    fn: F,
+  ): F => stalkAsyncWithOptions(name, null, fn);
 
   const interval = setInterval(flush, autoFlushInterval);
 
@@ -71,6 +95,8 @@ export function stalker(storage: Storage, autoFlushInterval: number = 3000) {
     startSession,
     flush,
     dispose,
+    stalkWithOptions,
+    stalkAsyncWithOptions,
     stalk,
     stalkAsync,
   };
