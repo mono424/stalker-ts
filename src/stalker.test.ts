@@ -18,6 +18,21 @@ test("Simple Test", async () => {
   expect(storage.savedSessions[0].events[0].name).toBe("test");
 });
 
+test("Simple Test with every", async () => {
+  const storage = mockStorage();
+  const s = stalker(storage);
+
+  for (let i = 0; i < 12; i++) {
+    const session = s.startSession("test", { every: 5 });
+    session.addEvent("test");
+    session.endSession();
+  }
+
+  await s.flush();
+
+  expect(storage.savedSessions).toHaveLength(3);
+});
+
 test("Simple Stalk Sync Function Test", async () => {
   const storage = mockStorage();
   const s = stalker(storage);
