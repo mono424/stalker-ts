@@ -1,10 +1,14 @@
 import { Storage } from "./storage";
-import { createSession, StalkerSession } from "./session";
+import { createSession, createSkippedSession, StalkerSession } from "./session";
+
+export interface StalkerSessionOptions {
+  every: number;
+}
 
 export interface Stalker {
   autoFlushInterval: number;
 
-  startSession(name: string): StalkerSession;
+  startSession(name: string, options?: StalkerSessionOptions): StalkerSession;
   flush(): Promise<void>;
   dispose(): void;
 
@@ -16,6 +20,7 @@ export interface Stalker {
 }
 
 export function stalker(storage: Storage, autoFlushInterval: number = 3000) {
+  const sessionCounter = new Map<string, number>();
   const unsafedSessions: StalkerSession[] = [];
 
   const flush = async () => {
@@ -24,10 +29,17 @@ export function stalker(storage: Storage, autoFlushInterval: number = 3000) {
     await storage.saveSessions(sessions);
   };
 
-  const startSession = (name: string) =>
-    createSession(name, (session) => {
-      unsafedSessions.push(session);
-    });
+  const startSession = (name: string, options?: StalkerSessionOptions) => {
+    const sCount = sessionCounter.get(name) || 0;
+    const shouldSkip = options?.every && sCount % options.every !== 0;
+    const session = shouldSkip
+      ? createSkippedSession(name)
+      : createSession(name, (session) => {
+          unsafedSessions.push(session);
+        });
+    sessionCounter.set(name, sCount + 1);
+    return session;
+  };
 
   const stalk = <F extends (...args: any[]) => any>(name: string, fn: F): F =>
     ((...args: any[]) => {
