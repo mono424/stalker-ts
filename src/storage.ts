@@ -43,7 +43,6 @@ export function influxdb2Storage(
       }, [] as Point[]);
       await writeApi.writePoints(points);
       await writeApi.close();
-      console.log("Flushed", points[0].toLineProtocol());
     },
   };
 }
