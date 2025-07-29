@@ -1,5 +1,5 @@
 import { StalkerSession } from "./session";
-import { InfluxDB, Point } from "@influxdata/influxdb-client";
+import { InfluxDB, Point } from "@influxdata/influxdb-client-browser";
 
 export interface Storage {
   saveSessions(sessions: StalkerSession[]): Promise<void>;
@@ -41,8 +41,8 @@ export function influxdb2Storage(
         });
         return acc.concat(sessionPoint, ...eventPoints);
       }, [] as Point[]);
-
       await writeApi.writePoints(points);
+      await writeApi.flush();
     },
   };
 }

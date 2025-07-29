@@ -33,7 +33,6 @@ export interface Stalker {
 export function stalker(storage: Storage, autoFlushInterval: number = 3000) {
   const sessionCounter = new Map<string, number>();
   const unsafedSessions: StalkerSession[] = [];
-
   const flush = async () => {
     if (unsafedSessions.length === 0) return;
     const sessions = unsafedSessions.splice(0, unsafedSessions.length);
