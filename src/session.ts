@@ -16,10 +16,7 @@ export interface StalkerSession {
 }
 
 function now(): number {
-  if (typeof window !== "undefined") {
-    return window.performance.now();
-  }
-  return Date.now() * 1000 * 1000;
+  return Date.now();
 }
 
 export function createSkippedSession(name: string): StalkerSession {

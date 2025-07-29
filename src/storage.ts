@@ -23,7 +23,7 @@ export function influxdb2Storage(
 ): Storage {
   return {
     saveSessions: async (sessions: StalkerSession[]) => {
-      const writeApi = client.getWriteApi(org, bucket, "us"); // us = microseconds
+      const writeApi = client.getWriteApi(org, bucket, "ms");
       const points = sessions.reduce((acc, session) => {
         const sessionPoint = new Point("stalker_session")
           .tag("type", "session")
@@ -43,6 +43,7 @@ export function influxdb2Storage(
       }, [] as Point[]);
       await writeApi.writePoints(points);
       await writeApi.close();
+      console.log("Flushed", points[0].toLineProtocol());
     },
   };
 }
