@@ -1,6 +1,7 @@
 export interface StalkerEvent {
   name: string;
   time: number;
+  duration: number;
 }
 
 export interface StalkerSession {
@@ -41,7 +42,12 @@ export function createSession(
     events: [],
     skipped: false,
     addEvent: (name: string) => {
-      session.events.push({ name, time: now() });
+      const time = now();
+      if (session.events.length > 0) {
+        session.events[session.events.length - 1].duration =
+          time - session.events[session.events.length - 1].time;
+      }
+      session.events.push({ name, time, duration: 0 });
     },
     endSession: () => {
       session.endTime = now();

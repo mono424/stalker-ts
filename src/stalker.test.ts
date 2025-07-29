@@ -76,3 +76,43 @@ test("Simple Stalk Async Function Test", async () => {
   expect(storage.savedSessions[0].events).toHaveLength(0);
   expect(storage.savedSessions[0].getDuration()).toBeGreaterThanOrEqual(10);
 });
+
+test("Simple Event Duration Test", async () => {
+  const storage = mockStorage();
+  const s = stalker(storage);
+
+  const testFn = async () => {
+    const session = s.startSession("test");
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    session.addEvent("test1");
+    await new Promise((resolve) => setTimeout(resolve, 40));
+    session.addEvent("test2");
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    session.addEvent("test3");
+    session.endSession();
+    return 1;
+  };
+
+  const result = await testFn();
+  expect(result).toBe(1);
+
+  await s.flush();
+
+  expect(storage.savedSessions).toHaveLength(1);
+  expect(storage.savedSessions[0].name).toBe("test");
+  expect(storage.savedSessions[0].events).toHaveLength(3);
+  expect(storage.savedSessions[0].getDuration()).toBeGreaterThanOrEqual(60);
+
+  expect(storage.savedSessions[0].events[0].duration).toBeGreaterThanOrEqual(
+    40,
+  );
+  expect(storage.savedSessions[0].events[0].duration).toBeLessThan(60);
+
+  expect(storage.savedSessions[0].events[1].duration).toBeGreaterThanOrEqual(
+    10,
+  );
+  expect(storage.savedSessions[0].events[1].duration).toBeLessThan(30);
+
+  expect(storage.savedSessions[0].events[2].duration).toBeGreaterThanOrEqual(0);
+  expect(storage.savedSessions[0].events[2].duration).toBeLessThan(20);
+});
