@@ -30,12 +30,16 @@ export function influxdb2Storage(
           .tag("name", session.name)
           .floatField("duration", session.getDuration())
           .timestamp(session.startTime);
-        const eventPoints = session.events.map((event) => {
+        const eventPoints = session.events.map((event, i) => {
+          const duration =
+            i === session.events.length - 1
+              ? 0
+              : event.time - session.events[i + 1].time;
           const eventPoint = new Point("stalker_session_event")
             .tag("type", "event")
             .tag("name", event.name)
             .tag("parent_session_name", session.name)
-            .floatField("duration", event.time - session.startTime)
+            .floatField("duration", duration)
             .timestamp(event.time);
           return eventPoint;
         });

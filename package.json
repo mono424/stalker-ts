@@ -1,6 +1,6 @@
 {
   "name": "@mono424/stalker-ts",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "",
   "main": "src/index.ts",
   "types": "dist/index.d.ts",
