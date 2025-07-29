@@ -21,9 +21,9 @@ export function influxdb2Storage(
   org: string,
   bucket: string,
 ): Storage {
-  const writeApi = client.getWriteApi(org, bucket, "us"); // us = microseconds
   return {
     saveSessions: async (sessions: StalkerSession[]) => {
+      const writeApi = client.getWriteApi(org, bucket, "us"); // us = microseconds
       const points = sessions.reduce((acc, session) => {
         const sessionPoint = new Point("stalker_session")
           .tag("type", "session")
@@ -42,7 +42,7 @@ export function influxdb2Storage(
         return acc.concat(sessionPoint, ...eventPoints);
       }, [] as Point[]);
       await writeApi.writePoints(points);
-      await writeApi.flush();
+      await writeApi.close();
     },
   };
 }
