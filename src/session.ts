@@ -13,6 +13,7 @@ export interface StalkerSession {
 
   addEvent(name: string): void;
   endSession(): void;
+  discardSession(): void;
   getDuration(): number;
 }
 
@@ -28,6 +29,7 @@ export function createSkippedSession(name: string): StalkerSession {
     skipped: true,
     addEvent: () => {},
     endSession: () => {},
+    discardSession: () => {},
     getDuration: () => 0,
   };
 }
@@ -36,12 +38,17 @@ export function createSession(
   name: string,
   onEnd: (session: StalkerSession) => void,
 ): StalkerSession {
+  let discarded = false;
   const session: StalkerSession = {
     name,
     startTime: now(),
     events: [],
     skipped: false,
     addEvent: (name: string) => {
+      if (discarded) {
+        console.warn("Session was already discarded");
+        return;
+      }
       const time = now();
       if (session.events.length > 0) {
         session.events[session.events.length - 1].duration =
@@ -50,10 +57,21 @@ export function createSession(
       session.events.push({ name, time, duration: 0 });
     },
     endSession: () => {
+      if (discarded) {
+        console.warn("Session was already discarded");
+        return;
+      }
       session.endTime = now();
       onEnd(session);
     },
+    discardSession: () => {
+      discarded = true;
+    },
     getDuration: () => {
+      if (discarded) {
+        console.warn("Session was already discarded");
+        return;
+      }
       if (!session.endTime) {
         throw new Error("Session not ended");
       }
