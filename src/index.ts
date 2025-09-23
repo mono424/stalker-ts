@@ -1,3 +1,3 @@
 export * from "./stalker";
-export * from "./session";
+export { StalkerSession, StalkerEvent } from "./session";
 export * from "./storage";
