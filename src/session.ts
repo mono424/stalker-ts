@@ -2,6 +2,7 @@ export interface StalkerEvent {
   name: string;
   time: number;
   duration: number;
+  payload?: Record<string, number>;
 }
 
 export interface StalkerSession {
@@ -11,7 +12,7 @@ export interface StalkerSession {
   events: StalkerEvent[];
   skipped: boolean;
 
-  addEvent(name: string): void;
+  addEvent(name: string, payload?: Record<string, number>): void;
   endSession(): void;
   discardSession(): void;
   getDuration(): number;
@@ -44,7 +45,7 @@ export function createSession(
     startTime: now(),
     events: [],
     skipped: false,
-    addEvent: (name: string) => {
+    addEvent: (name: string, payload?: Record<string, number>) => {
       if (discarded) {
         console.warn("Session was already discarded");
         return;
@@ -54,7 +55,7 @@ export function createSession(
         session.events[session.events.length - 1].duration =
           time - session.events[session.events.length - 1].time;
       }
-      session.events.push({ name, time, duration: 0 });
+      session.events.push({ name, time, duration: 0, payload });
     },
     endSession: () => {
       if (discarded) {
